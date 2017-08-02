@@ -31,7 +31,7 @@ class LDAPException : public std::exception {
 	LDAPException();
 	LDAPException(const char* str);
 	LDAPException(const char* what, const std::string& diag);
-	virtual ~LDAPException() throw() {};
+    virtual ~LDAPException() throw() {}
 
 	virtual const char* what() const throw();
 	virtual const std::string diag() const throw();
@@ -458,12 +458,11 @@ class LDAPEntry
     public:
 	LDAPEntry(LDAPConnection *conn, LDAPMessage *entry);
 	LDAPEntry(LDAPConnection *conn, std::string dn);
-	~LDAPEntry();
 
 	std::string GetDN();
 	SearchableVector<std::string>* GetKeys();
 	std::string GetFirstValue(std::string key);
-	SearchableVector<std::string>* GetValue(std::string key);
+    SearchableVector<std::string> GetValue(std::string key);
 
 	void AddValue(std::string key, std::string value);
 	void RemoveValue(std::string key, std::string value);
@@ -475,7 +474,7 @@ class LDAPEntry
     private:
 	LDAPConnection *_conn;
 	std::string _dn;
-	std::map<std::string, SearchableVector<std::string>*> _data;
+    std::map<std::string, SearchableVector<std::string>> _data;
 	bool _isnew;
 
 	std::map<std::string, SearchableVector<std::string>*> _added;
@@ -486,7 +485,6 @@ class LDAPResult
 {
     public:
 	LDAPResult(LDAPConnection* conn, std::vector<LDAPMessage*> msg);
-	~LDAPResult() {};
 
 	std::vector<LDAPEntry>* GetEntries();
 

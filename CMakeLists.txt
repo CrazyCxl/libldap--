@@ -23,3 +23,8 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "libldap-2.4-2")
 set(CPACK_RPM_PACKAGE_REQUIRES "libldap >= 2.4")
 
 include(CPack)
+
+add_definitions(-std=c++11)
+
+SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -Wall -g")

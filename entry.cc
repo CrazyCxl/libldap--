@@ -50,12 +50,12 @@ LDAPEntry::LDAPEntry(LDAPConnection* conn, LDAPMessage* entry)
 	for (attr = ldap_first_attribute(_conn->_ldap, entry, &ptr);
 		attr != 0; attr = ldap_next_attribute(_conn->_ldap, entry, ptr))
 	{
-		SearchableVector<std::string>* values = new SearchableVector<std::string>;
+        SearchableVector<std::string> values;
 		struct berval **bv =
 				ldap_get_values_len(_conn->_ldap, entry, attr);
 
 		for (int i = 0; i < ldap_count_values_len(bv); i++)
-			values->push_back(std::string(bv[i]->bv_val, bv[i]->bv_len));
+            values.push_back(std::string(bv[i]->bv_val, bv[i]->bv_len));
 
 		ldap_value_free_len(bv);
 
@@ -65,17 +65,6 @@ LDAPEntry::LDAPEntry(LDAPConnection* conn, LDAPMessage* entry)
 
 	if (ptr != 0)
 		ber_free(ptr, 0);
-}
-
-/**
- * Clean up the LDAP entry. This will discard all changes to the object.
- */
-LDAPEntry::~LDAPEntry()
-{
-	std::map<std::string, SearchableVector<std::string>*>::iterator iter;
-
-	for (iter = _data.begin(); iter != _data.end(); iter++)
-		delete (*iter).second;
 }
 
 /**
@@ -96,10 +85,9 @@ std::string LDAPEntry::GetDN()
  */
 SearchableVector<std::string>* LDAPEntry::GetKeys()
 {
-	std::map<std::string, SearchableVector<std::string>*>::iterator iter;
 	SearchableVector<std::string>* rv = new SearchableVector<std::string>();
 
-	for (iter = _data.begin(); iter != _data.end(); iter++)
+    for (auto iter = _data.begin(); iter != _data.end(); iter++)
 		rv->push_back((*iter).first);
 
 	return rv;
@@ -111,7 +99,7 @@ SearchableVector<std::string>* LDAPEntry::GetKeys()
  * @param attribute Name of the LDAP attribute.
  * @return Pointer to a vector of strings with the values.
  */
-SearchableVector<std::string>* LDAPEntry::GetValue(std::string attribute)
+SearchableVector<std::string> LDAPEntry::GetValue(std::string attribute)
 {
 	return _data[attribute];
 }
@@ -127,7 +115,7 @@ std::string LDAPEntry::GetFirstValue(std::string attribute)
 	if (_data.find(attribute) == _data.end())
 		return std::string("");
 
-	return _data[attribute]->front();
+    return _data[attribute].front();
 }
 
 /**
@@ -140,15 +128,13 @@ std::string LDAPEntry::GetFirstValue(std::string attribute)
  */
 void LDAPEntry::AddValue(std::string attribute, std::string value)
 {
-	if (_data[attribute] == 0)
-		_data[attribute] = new SearchableVector<std::string>;
 
-	_data[attribute]->push_back(value);
+    _data[attribute].push_back(value);
 
-	if (_added[attribute] == 0)
-		_added[attribute] = new SearchableVector<std::string>;
+    if (_added[attribute] == 0)
+        _added[attribute] = new SearchableVector<std::string>;
 
-	_added[attribute]->push_back(value);
+    _added[attribute]->push_back(value);
 }
 
 /**
@@ -159,13 +145,11 @@ void LDAPEntry::AddValue(std::string attribute, std::string value)
  */
 void LDAPEntry::RemoveValue(std::string attribute, std::string value)
 {
-	SearchableVector<std::string>::iterator iter;
-
 	// Bail out early if the key isn't in the record.
-	if (_data[attribute] == 0)
+    if (_data.count(attribute) == 0)
 		return;
 
-	for (iter = _data[attribute]->begin(); iter != _data[attribute]->end(); iter++)
+    for (auto iter = _data[attribute].begin(); iter != _data[attribute].end(); iter++)
 		if (!(*iter).compare(value))
 		{
 			if (_removed[attribute] == 0)
@@ -174,7 +158,7 @@ void LDAPEntry::RemoveValue(std::string attribute, std::string value)
 			_removed[attribute]->push_back(value);
 		}
 
-	if (_data[attribute]->empty())
+    if (_data[attribute].empty())
 		_data.erase(attribute);
 }
 
@@ -188,10 +172,10 @@ void LDAPEntry::RemoveAllValues(std::string attribute)
 	SearchableVector<std::string>::iterator iter;
 
 	// Bail out early if the key isn't in the record.
-	if (_data[attribute] == 0)
+    if (_data.count(attribute) == 0)
 		return;
 
-	for (iter = _data[attribute]->begin(); iter != _data[attribute]->end(); iter++)
+    for (iter = _data[attribute].begin(); iter != _data[attribute].end(); iter++)
 	{
 		if (_removed[attribute] == 0)
 			_removed[attribute] = new SearchableVector<std::string>;
