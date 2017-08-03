@@ -460,7 +460,7 @@ class LDAPEntry
 	LDAPEntry(LDAPConnection *conn, std::string dn);
 
 	std::string GetDN();
-	SearchableVector<std::string>* GetKeys();
+    SearchableVector<std::string> GetKeys();
 	std::string GetFirstValue(std::string key);
     SearchableVector<std::string> GetValue(std::string key);
 
@@ -511,16 +511,16 @@ class LDAPConnection
 	void SASLBind(std::string user, std::string password);
 	void SetResultSizeLimit(int limit);
 
-	LDAPResult* Search(const std::string base, const std::string filter);
-	LDAPResult* Search(const std::string base, const std::string filter,
+    LDAPResult *Search(const std::string base, const std::string filter);
+    LDAPResult *Search(const std::string base, const std::string filter,
 		long timeout);
-	LDAPResult* Search(const std::string base, int scope,
+    LDAPResult *Search(const std::string base, int scope,
 		const std::string filter);
-	LDAPResult* Search(const std::string base, int scope,
+    LDAPResult *Search(const std::string base, int scope,
 		const std::string filter, long timeout);
-	LDAPResult* Search(const std::string base, int scope,
+    LDAPResult *Search(const std::string base, int scope,
 		const std::string filter, const std::vector<std::string> attrs);
-	LDAPResult* Search(const std::string base, int scope,
+    LDAPResult *Search(const std::string base, int scope,
 		const std::string filter,
 		const std::vector<std::string> attrs, long timeout);
 

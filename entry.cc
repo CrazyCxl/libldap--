@@ -83,12 +83,12 @@ std::string LDAPEntry::GetDN()
  *
  * @return Pointer to a vector of strings with the attribute names.
  */
-SearchableVector<std::string>* LDAPEntry::GetKeys()
+SearchableVector<std::string> LDAPEntry::GetKeys()
 {
-	SearchableVector<std::string>* rv = new SearchableVector<std::string>();
+    SearchableVector<std::string> rv;
 
     for (auto iter = _data.begin(); iter != _data.end(); iter++)
-		rv->push_back((*iter).first);
+        rv.push_back((*iter).first);
 
 	return rv;
 }

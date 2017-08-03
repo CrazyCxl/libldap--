@@ -169,26 +169,26 @@ void LDAPConnection::SetResultSizeLimit(int limit)
  *         the query.
  * @throws LDAPException An error occurred processing the search query.
  */
-LDAPResult* LDAPConnection::Search(const std::string base, int scope,
+LDAPResult *LDAPConnection::Search(const std::string base, int scope,
 	const std::string filter, const std::vector<std::string> attrs,
 	long timeout)
 {
 	std::vector<char*> attrlist;
-	std::vector<LDAPMessage*> msgs;
+    std::vector<LDAPMessage*> msgs;
 	std::vector<LDAPControl*> ctrls;
 	LDAPControl* pageCtrl, *ctrl;
 	LDAPControl** returnedCtrl;
-	berval* cookie = new berval;
+    berval cookie;
 	timeval tv;
 	LDAPMessage *msg;
 	int rc, i = 0, errCode = 0, numResults = 0, count = 0;
 
-	cookie->bv_len = 0;
-	cookie->bv_val = 0;
+    cookie.bv_len = 0;
+    cookie.bv_val = 0;
 	tv.tv_sec = timeout / 1000;
 	tv.tv_usec = (timeout % 1000) * 1000;
 
-	for (i = 0; i < attrs.size(); i++)
+    for (u_int i = 0; i < attrs.size(); i++)
 		attrlist.push_back(const_cast<char*>(attrs[i].c_str()));
 
 	attrlist.push_back(0);
@@ -202,19 +202,22 @@ LDAPResult* LDAPConnection::Search(const std::string base, int scope,
 
 	do {
 		rc = ldap_create_page_control_value(_ldap, _size_limit,
-                                cookie, &ctrl->ldctl_value);
+                                &cookie, &ctrl->ldctl_value);
 		if (rc)
 			LDAPErrCode2Exception(_ldap, rc);
 
-		if (cookie && cookie->bv_val != NULL)
+        if (cookie.bv_val != NULL)
 		{
-			ber_memfree(cookie->bv_val);
-			cookie->bv_val = 0;
-			cookie->bv_len = 0;
+            ber_memfree(cookie.bv_val);
+            cookie.bv_val = 0;
+            cookie.bv_len = 0;
 		}
 
 		rc = ldap_search_ext_s(_ldap, base.c_str(), scope,
 				filter.c_str(), &attrlist[0], 0, &ctrls[0], 0, &tv, 0, &msg);
+
+        delete ctrl;
+
 		if (rc && rc != LDAP_PARTIAL_RESULTS &&
 			rc != LDAP_ADMINLIMIT_EXCEEDED &&
 			rc != LDAP_SIZELIMIT_EXCEEDED)
@@ -235,35 +238,28 @@ LDAPResult* LDAPConnection::Search(const std::string base, int scope,
 			break;
 		}
 
-		if (cookie)
-		{
-			if (cookie->bv_val)
-				ber_memfree(cookie->bv_val);
-			cookie->bv_val = 0;
-			cookie->bv_len = 0;
-		}
+        if (cookie.bv_val)
+            ber_memfree(cookie.bv_val);
+        cookie.bv_val = 0;
+        cookie.bv_len = 0;
 
 		rc = ldap_parse_pageresponse_control(_ldap, pageCtrl,
-				&i, cookie);
+                &i, &cookie);
 		if (rc)
 			LDAPErrCode2Exception(_ldap, rc);
 
 		ldap_controls_free(returnedCtrl);
 		count = ldap_count_entries(_ldap, msg);
 		numResults += count;
-	} while (cookie->bv_len > 0 && strlen(cookie->bv_val) > 0);
+    } while (cookie.bv_len > 0 && strlen(cookie.bv_val) > 0);
 
-	if (cookie)
-	{
-	       if (cookie->bv_val)
-		       ber_memfree(cookie->bv_val);
+   if (cookie.bv_val)
+       ber_memfree(cookie.bv_val);
 
-		cookie->bv_val = 0;
-		cookie->bv_len = 0;
-		delete cookie;
-	}
+    cookie.bv_val = 0;
+    cookie.bv_len = 0;
 
-	return new LDAPResult(this, msgs);
+    return new LDAPResult(this, msgs);
 }
 
 /**
@@ -278,7 +274,7 @@ LDAPResult* LDAPConnection::Search(const std::string base, int scope,
  *         the query.
  * @throws LDAPException An error occurred processing the search query.
  */
-LDAPResult* LDAPConnection::Search(const std::string base, int scope,
+LDAPResult *LDAPConnection::Search(const std::string base, int scope,
 	const std::string filter, const std::vector<std::string> attrs)
 {
 	return Search(base, scope, filter, attrs, 30000);
@@ -296,7 +292,7 @@ LDAPResult* LDAPConnection::Search(const std::string base, int scope,
  *         the query.
  * @throws LDAPException An error occurred processing the search query.
  */
-LDAPResult* LDAPConnection::Search(const std::string base, int scope,
+LDAPResult *LDAPConnection::Search(const std::string base, int scope,
 	const std::string filter, long timeout)
 {
 	return Search(base, scope, filter, kLdapFilterAll, timeout);
@@ -313,10 +309,10 @@ LDAPResult* LDAPConnection::Search(const std::string base, int scope,
  *         the query.
  * @throws LDAPException An error occurred processing the search query.
  */
-LDAPResult* LDAPConnection::Search(const std::string base, int scope,
+LDAPResult *LDAPConnection::Search(const std::string base, int scope,
 	const std::string filter)
 {
-	return Search(base, scope, filter, kLdapFilterAll, 30000);
+    return Search(base, scope, filter, kLdapFilterAll, 30000);
 }
 
 /**
@@ -330,7 +326,7 @@ LDAPResult* LDAPConnection::Search(const std::string base, int scope,
  *         the query.
  * @throws LDAPException An error occurred processing the search query.
  */
-LDAPResult* LDAPConnection::Search(const std::string base,
+LDAPResult *LDAPConnection::Search(const std::string base,
 	const std::string filter, long timeout)
 {
 	return Search(base, LDAP_SCOPE_SUBTREE, filter, kLdapFilterAll,
@@ -348,7 +344,7 @@ LDAPResult* LDAPConnection::Search(const std::string base,
  *         the query.
  * @throws LDAPException An error occurred processing the search query.
  */
-LDAPResult* LDAPConnection::Search(const std::string base,
+LDAPResult *LDAPConnection::Search(const std::string base,
 	const std::string filter)
 {
 	return Search(base, LDAP_SCOPE_SUBTREE, filter, kLdapFilterAll, 30000);
