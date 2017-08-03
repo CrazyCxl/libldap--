@@ -17,3 +17,4 @@ make install
     LDAPResult *result = connect->Search("cn=xxx,dc=xxx,dc=xxx",LDAP_SCOPE_BASE,"(cn=xxx)");
 
     delete result;
+    delete connect;
