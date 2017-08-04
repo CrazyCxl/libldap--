@@ -456,6 +456,7 @@ void LDAPErrCode2Exception(LDAP* ldap, int errcode);
 class LDAPEntry
 {
     public:
+    LDAPEntry(){}
 	LDAPEntry(LDAPConnection *conn, LDAPMessage *entry);
 	LDAPEntry(LDAPConnection *conn, std::string dn);
 
@@ -471,8 +472,10 @@ class LDAPEntry
 
 	void Output(std::ostream& out);
 
+    bool isValid() {return _conn != NULL; }
+
     private:
-	LDAPConnection *_conn;
+    LDAPConnection *_conn = NULL;
 	std::string _dn;
     std::map<std::string, SearchableVector<std::string>> _data;
 	bool _isnew;
